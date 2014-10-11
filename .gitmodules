@@ -1,3 +1,4 @@
 [submodule "ki"]
 	path = ki
 	url = https://github.com/lantiga/ki.git
+	ignore = dirty
