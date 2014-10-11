@@ -19,6 +19,8 @@ cp files/Info.plist ki.docset/Contents/Info.plist
 jekyll build ki -s ki -d $DOC
 rm -f "${DOC}CNAME"
 
+cp files/styles.css "${DOC}css/"
+
 ### create sql file
 sqlite3 $IDX "CREATE TABLE searchIndex(id INTEGER PRIMARY KEY, name TEXT, type TEXT, path TEXT);"
 sqlite3 $IDX "CREATE UNIQUE INDEX anchor ON searchIndex (name, type, path);"
@@ -33,6 +35,12 @@ for file in ${files[@]}; do
     mv tmp "${DOC}${file}.html"
 
     sed 's/<link.*pure-min\.css\">//g' "${DOC}${file}.html" > tmp
+    mv tmp "${DOC}${file}.html"
+
+    sed 's/^.*a.*img.*Fork\ me\ on\ GitHub.*$//g' "${DOC}${file}.html" > tmp
+    mv tmp "${DOC}${file}.html"
+
+    sed 's/default\.css\">/default\.css\"><link\ rel=\"stylesheet\"\ href=\"css\/styles\.css\">/g' "${DOC}${file}.html" > tmp
     mv tmp "${DOC}${file}.html"
 done
 
