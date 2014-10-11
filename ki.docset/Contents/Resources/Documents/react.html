@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>React tutorial</title>
+        <meta name="viewport" content="width=device-width">
+
+        <link href='http://fonts.googleapis.com/css?family=Droid+Sans+Mono|Open+Sans:400italic,400' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="css/syntax.css">
+      	
+        <link rel="stylesheet" href="css/default.css">
+
+    </head>
+
+    <body>
+      <a href="https://github.com/lantiga/ki"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://github-camo.global.ssl.fastly.net/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+    	<div class="pure-g">
+        <div class="pure-u-1-5"></div>
+    		<div class="pure-u-3-5">
+          <a href=""><img height="auto" width="100%" style="margin-top: 20px;" src="images/ki-color.svg" /></a>
+          <style>
+  code {
+    font-size: small;
+  }
+</style>
+
+<h1 id="reactjs-tutorial-in-ki">ReactJS tutorial in ki</h1>
+
+<p>The <code>index.html</code> page:</p>
+
+<pre><code>&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;Hello React&lt;/title&gt;
+    &lt;script src="http://fb.me/react-0.8.0.js"&gt;&lt;/script&gt;
+    &lt;script src="http://code.jquery.com/jquery-1.10.0.min.js"&gt;&lt;/script&gt;
+    &lt;script src="mori.js"&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id="content"&gt;&lt;/div&gt;
+    &lt;script src="react_ki.out.js"&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<p>A few macros for writing React components concisely using s-expressions instead of JSX </p>
+
+<pre><code>ki macro (defcomp $name $render_body) 
+         (def $name ((js React.createClass) 
+                     {$ 'render' (fn [] $render_body)}))
+                     
+ki macro (defcomp $name {$kv ...} $render_body) 
+         (def $name ((js React.createClass) 
+                     {$kv ... 'render' (fn [] $render_body)}))
+                                         
+ki macro (dom $tag {$kv ...} $children ...)
+         ((js React.DOM.$tag) {$kv ...} $children ...)
+                                                   
+ki macro (dom $tag $children ...)
+         ((js React.DOM.$tag) (js {}) $children ...)
+</code></pre>
+
+<p>Tutorial code starts here. A few things to note:</p>
+
+<ul>
+  <li>the CommentBox component just does a fake async request using setTimeout</li>
+  <li>state is stored in a persistent data structure within React state in CommentBox</li>
+</ul>
+
+<p>In a more elaborate version global state could be moved to an atom using atom callbacks to trigger a re-rendering.</p>
+
+<pre><code>ki require core
+
+ki (do
+
+ (def data [{:author "Pete Hunt" :text "This is one comment"}
+            {:author "Jordan Walke" :text "This is another comment"}])
+
+ (defcomp Comment
+  (dom div {$ :className 'comment'} 
+   (dom h2 {$ :className 'commentAuthor'} this.props.author) 
+   this.props.children))
+
+ (defcomp CommentList
+  (dom div {$ :className 'commentList'} 
+   (clj_to_js 
+    (map (fn [comment i] 
+          (Comment {$ :author (get comment :author)} (get comment :text))) 
+     this.props.data))))
+
+ (defcomp CommentForm
+  {$ :handleSubmit 
+      (fn []
+       (let [author (js this.refs.author.getDOMNode().value.trim())
+             text (js this.refs.text.getDOMNode().value.trim())]
+        (this.props.onCommentSubmit {:author author :text text})
+        (js this.refs.author.getDOMNode().value = '')
+        (js this.refs.text.getDOMNode().value = '')
+        false))}
+  (dom form {$ :className 'commentForm' :onSubmit this.handleSubmit} 
+   (dom input {$ :type 'text' :placeholder 'Your name' :ref 'author'})
+   (dom input {$ :type 'text' :placeholder 'Say something...' :ref 'text'})
+   (dom input {$ :type 'submit' :value 'Post'})))
+
+ (defcomp CommentBox 
+  {$ :getInitialState
+      (fn [] 
+       {$ :data [{:author "Pete Hunt" :text "This is one comment"}]})
+     :componentWillMount 
+      (fn [] 
+       (setTimeout (fnth [] (this.setState {$ :data data})) 1000))
+     :handleCommentSubmit 
+      (fn [comment] 
+       (this.setState {$ data (conj this.state.data comment)}))}
+  (dom div {$ :className 'commentBox'} 
+   (dom h1 'Comments') 
+   (CommentList {$ :data this.state.data}) 
+   (CommentForm {$ :onCommentSubmit this.handleCommentSubmit})))
+
+ (React.renderComponent (CommentBox) (document.getElementById 'content'))
+)
+</code></pre>
+
+
+        </div>
+        <div class="pure-u-1-5"></div>
+      </div>
+
+      <script type="text/javascript">
+
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-49216937-1']);
+        _gaq.push(['_setDomainName', 'ki-lang.org']);
+        _gaq.push(['_trackPageview']);
+        
+        (function() {
+         var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+         ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+         var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+         })();
+
+      </script>
+
+      </body>
+      </html>

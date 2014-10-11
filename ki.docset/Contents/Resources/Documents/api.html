@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>ki reference</title>
+        <meta name="viewport" content="width=device-width">
+
+        <link href='http://fonts.googleapis.com/css?family=Droid+Sans+Mono|Open+Sans:400italic,400' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="css/syntax.css">
+      	
+        <link rel="stylesheet" href="css/default.css">
+
+    </head>
+
+    <body>
+      <a href="https://github.com/lantiga/ki"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://github-camo.global.ssl.fastly.net/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+    	<div class="pure-g">
+        <div class="pure-u-1-5"></div>
+    		<div class="pure-u-3-5">
+          <a href=""><img height="auto" width="100%" style="margin-top: 20px;" src="images/ki-color.svg" /></a>
+          <style>
+  body {
+    font-size: small;
+  }
+</style>
+
+<h1 id="ki-reference">ki reference</h1>
+
+<h4 id="basics">Basics</h4>
+
+<p><a href="#basics">Basics</a>
+<a href="#literals">Literals</a>
+<a href="#arithmetics">Arithmetics</a>
+<a href="#comparisons">Comparisons</a>
+<a href="#logical">Logical</a>
+<a href="#functions">Functions</a>
+<a href="#atoms">Atoms</a>
+<a href="#exceptions">Exceptions</a>
+<a href="#flow">Flow</a>
+<a href="#conditionals">Conditionals</a>
+<a href="#multimethods">Multimethods</a>
+<a href="#interoperability">Interoperability</a>
+<a href="#variables">Variables</a>
+<a href="#namespaces">Namespaces</a>
+<a href="#looping-and-recursion">Looping and recursion</a>
+<a href="#local-bindings">Local bindings</a>
+<a href="#misc">Misc</a></p>
+
+<hr />
+
+<h3 id="basics-1">Basics</h3>
+
+<h4 id="ki-require"><code>ki require</code></h4>
+
+<h5 id="ki-require-core"><code>ki require core</code></h5>
+
+<h5 id="ki-require-modulename-as-name"><code>ki require 'module_name' as name</code></h5>
+
+<p>Requires a node module using <a href="http://nodejs.org/api/modules.html#modules_module_require_id">node’s require</a> and makes it available to all ki namespaces by binding the returned object to the provided <code>name</code>. It has to be called outside ki forms.</p>
+
+<p><code>ki require core</code> initializes a <code>_ki</code> global object (where namespaces, modules and defines are stored), requires <a href="http://swannodette.github.io/mori/">mori</a> and exposes all its functions to all ki namespaces. <code>ki require core</code> needs to be invoked before any ki forms or any other ki statement. Every invocation reinitializes the <code>_ki</code> object.</p>
+
+<pre><code>ki require core
+ki require 'fs' as fs
+
+ki (fs.readFile "somefile.txt" 
+    (fn [err data] data));
+</code></pre>
+
+<h4 id="ki-macro"><code>ki macro</code></h4>
+
+<h5 id="ki-macro-fromexpr--toexpr-"><code>ki macro (from_expr ...) (to_expr ...)</code></h5>
+
+<p>Defines a macro that expands an expression into another expression in subsequent ki forms. Expressions are specified using <a href="http://sweetjs.org/">sweet.js</a> pattern matching rules.</p>
+
+<pre><code>ki macro (thunk $body ...)
+         (fn [] $body ...)
+
+ki (thunk (alert "Whoops!"));
+</code></pre>
+
+<h4 id="ki-"><code>ki ()</code></h4>
+
+<h5 id="ki-expr-"><code>ki (expr ...)</code></h5>
+
+<p>Evaluates a ki form, returning its result to the enclosing JavaScript expression. The form is either evaluated within an explicit namespace (with <code>(ns ...)</code>) or within an anonymous namespace. Such namespace is retained for use in subsequent non-namespaced ki forms.</p>
+
+<pre><code>var foo = ki (range 1000);
+var bar = ki (ns my_ns (range 1000));
+
+ki (def foo 5);
+ki (prn foo);      =&gt; 5
+</code></pre>
+
+<h3 id="literals">Literals</h3>
+
+<h4 id="section"><code>[]</code></h4>
+
+<h5 id="val1-val2-"><code>[val1 val2 ...]</code></h5>
+
+<p>Creates a persistent vector (see <a href="http://swannodette.github.io/mori/">mori</a>). Note: avoid punctuation between elements.</p>
+
+<pre><code>[1 2 "a" :b]
+</code></pre>
+
+<h4 id="section-1"><code>{}</code></h4>
+
+<h5 id="key1-val1-key2-val2-"><code>{key1 val1 key2 val2 ...}</code></h5>
+
+<p>Creates a persistent hash map (see <a href="http://swannodette.github.io/mori/">mori</a>). Note: avoid punctuation between elements.</p>
+
+<pre><code>{:foo 1 "bar" [1 2 3] {:a 2 :b 3} 4}
+</code></pre>
+
+<h4 id="section-2"><code>[$ ]</code></h4>
+
+<h5 id="val1-val2--1"><code>[$ val1 val2 ...]</code></h5>
+
+<p>Creates a JavaScript array using an analogous notation to persistent data structures.</p>
+
+<pre><code>[$ 1 2 "a" "b"]
+</code></pre>
+
+<h4 id="section-3"><code>{$ }</code></h4>
+
+<h5 id="key1-val1-key2-val2--1"><code>{$ key1 val1 key2 val2 ...}</code></h5>
+
+<p>Creates a JavaScript object using an analogous notation to persistent data structures. Note: keys cannot be objects or arrays.</p>
+
+<pre><code>{$ a 1 "b" 2}
+</code></pre>
+
+<h4 id="keyword"><code>:keyword</code></h4>
+
+<p>Creates a ClojureScript keyword (see <a href="http://swannodette.github.io/mori/">mori</a>). Equivalent to <code>(keyword ...)</code>.</p>
+
+<pre><code>(def a :foo)
+(def b {:a 1 :b 2})
+</code></pre>
+
+<h4 id="nil"><code>nil</code></h4>
+
+<p>Synonym for JavaScript null.</p>
+
+<pre><code>(def a nil)
+</code></pre>
+
+<h3 id="arithmetics">Arithmetics</h3>
+
+<h4 id="add"><code>add</code></h4>
+
+<h5 id="add-arg1-arg2-"><code>(add arg1 arg2 ...)</code></h5>
+
+<p>Returns the sum of the arguments</p>
+
+<pre><code>(add 1 1 2 2)       =&gt; 6
+</code></pre>
+
+<h4 id="sub"><code>sub</code></h4>
+
+<h5 id="sub-arg1-arg2-"><code>(sub arg1 arg2 ...)</code></h5>
+
+<p>Returns the difference among the arguments</p>
+
+<pre><code>(sub 4 2 1)         =&gt; 1
+</code></pre>
+
+<h4 id="mul"><code>mul</code></h4>
+
+<h5 id="mul-arg1-arg2-"><code>(mul arg1 arg2 ...)</code></h5>
+
+<p>Returns the product of the arguments</p>
+
+<pre><code>(mul 4 2 2)         =&gt; 16
+</code></pre>
+
+<h4 id="div"><code>div</code></h4>
+
+<h5 id="div-arg1-arg2-"><code>(div arg1 arg2 ...)</code></h5>
+
+<p>Returns the result of the division between the arguments</p>
+
+<pre><code>(div 8 2 2)         =&gt; 2
+</code></pre>
+
+<h4 id="mod"><code>mod</code></h4>
+
+<h5 id="mod-arg1-arg2"><code>(mod arg1 arg2)</code></h5>
+
+<p>Returns the rest of the integer division between two numbers</p>
+
+<pre><code>(mod 5 3)           =&gt; 2
+</code></pre>
+
+<h3 id="comparisons">Comparisons</h3>
+
+<h4 id="eq"><code>eq</code></h4>
+
+<h5 id="eq-arg1-arg2-"><code>(eq arg1 arg2 ...)</code></h5>
+
+<p>Returns true if the arguments are equal. Equivalent to mori <a href="http://swannodette.github.io/mori/#equals">equals</a>, i.e. it tests deep equality on persistent collections.</p>
+
+<pre><code>(def a 1)
+(def b 1)
+(eq a b 1)              =&gt; true
+(def b [1 [2 {:a 3}]])
+(eq b [1 [2 {:a 3}]]    =&gt; true
+</code></pre>
+
+<h4 id="neq"><code>neq</code></h4>
+
+<h5 id="neq-arg1-arg2-"><code>(neq arg1 arg2 ...)</code></h5>
+
+<p>Returns false if the arguments are not equal (see eq).</p>
+
+<pre><code>(neq [1 2] [1 2] [1 3]) =&gt; true
+</code></pre>
+
+<h4 id="geq"><code>geq</code></h4>
+
+<h5 id="geq-arg1-arg2-"><code>(geq arg1 arg2 ...)</code></h5>
+
+<p>Returns true if a “greater than or equal” relationship holds for the arguments.</p>
+
+<pre><code>(geq 3 2 2)             =&gt; true
+</code></pre>
+
+<h4 id="leq"><code>leq</code></h4>
+
+<h5 id="leq-arg1-arg2-"><code>(leq arg1 arg2 ...)</code></h5>
+
+<p>Returns true if a “less than or equal” relationship holds for the arguments.</p>
+
+<pre><code>(leq 2 2 3)             =&gt; true
+</code></pre>
+
+<h4 id="gt"><code>gt</code></h4>
+
+<h5 id="gt-arg1-arg2-"><code>(gt arg1 arg2 ...)</code></h5>
+
+<p>Returns true if a “greater than” relationship holds for the arguments.</p>
+
+<pre><code>(gt 3 2 1)              =&gt; true
+</code></pre>
+
+<h4 id="lt"><code>lt</code></h4>
+
+<h5 id="lt-arg1-arg2-"><code>(lt arg1 arg2 ...)</code></h5>
+
+<p>Returns true if a “less than” relationship holds for the arguments.</p>
+
+<pre><code>(lt 1 2 3)              =&gt; true
+</code></pre>
+
+<h3 id="logical">Logical</h3>
+
+<h4 id="and"><code>and</code></h4>
+
+<h5 id="and-arg1-arg2-"><code>(and arg1 arg2 ...)</code></h5>
+
+<p>Returns true if all the arguments evaluate to truthy (i.e. not false, undefined or null).</p>
+
+<pre><code>(and true 1 "a")        =&gt; true
+</code></pre>
+
+<h4 id="or"><code>or</code></h4>
+
+<h5 id="or-arg1-arg2-"><code>(or arg1 arg2 ...)</code></h5>
+
+<p>Returns true if at least one of the arguments evaluates to truthy (i.e. not false, undefined or null).</p>
+
+<pre><code>(or false null 0)      =&gt; true
+</code></pre>
+
+<h4 id="not"><code>not</code></h4>
+
+<h5 id="not-arg"><code>(not arg)</code></h5>
+
+<p>Returns true if the argument evaluates to falsey (i.e. false, undefined or null). Synonym of falsey.</p>
+
+<pre><code>(not null)              =&gt; true
+</code></pre>
+
+<h4 id="truthy"><code>truthy</code></h4>
+
+<h5 id="truthy-arg"><code>(truthy arg)</code></h5>
+
+<p>Returns true if the argument is not false, undefined or null.</p>
+
+<pre><code>(truthy "")              =&gt; true
+</code></pre>
+
+<h4 id="falsey"><code>falsey</code></h4>
+
+<h5 id="falsey-arg"><code>(falsey arg)</code></h5>
+
+<p>Returns true if the argument is false, undefined or null.</p>
+
+<pre><code>(falsey 0)              =&gt; false
+(falsey null)           =&gt; true
+</code></pre>
+
+<h3 id="functions">Functions</h3>
+
+<h4 id="fn"><code>fn</code></h4>
+
+<h5 id="fn-arg1-arg2--body"><code>(fn [arg1 arg2 ...] body)</code></h5>
+
+<p>Returns an anonymous function taking n arguments and returning the result of the evaluation of the last form in the body. The returned function is a JavaScript function. Evaluating the function with fewer or more arguments than specified in the signature will not generate an error.</p>
+
+<pre><code>(fn [x] (prn x) (inc x))
+</code></pre>
+
+<p>Functions with multiple arities are supported. They can be defined by supplying their signatures in the same fn form. If evaluated with a number of arguments that doesn’t match any of the arities, the version with the greater arity is called.</p>
+
+<pre><code>(fn 
+  ([arg1 ... argN] body1)
+  ([arg1 ... argM] body2)
+  ...)
+
+(fn
+  ([] 0)
+  ([x] x)
+  ([x y] (add x y)))
+</code></pre>
+
+<h4 id="apply"><code>apply</code></h4>
+
+<h5 id="apply-func-coll"><code>(apply func coll)</code></h5>
+
+<p>Evaluates the supplied function with the elements of the provided collection as arguments.</p>
+
+<pre><code>(apply add [1 2 3])     =&gt; 6
+</code></pre>
+
+<p>An extra argument can be provided after the function name as the object that will be bound to <code>this</code> upon invocation.</p>
+
+<pre><code>(apply add {$ a 1} [this.a 2 3])     =&gt; 6
+</code></pre>
+
+<h4 id="bind"><code>bind</code></h4>
+
+<h5 id="bind-obj-func"><code>(bind obj func)</code></h5>
+
+<p>Binds the supplied function to the object.</p>
+
+<pre><code>(bind {$ a 1} (fn [] this.a))
+</code></pre>
+
+<h4 id="fnth"><code>fnth</code></h4>
+
+<h5 id="fnth-arg1-arg2--body"><code>(fnth [arg1 arg2 ...] body)</code></h5>
+
+<p>Returns an anonymous function and binds it to <code>this</code> in the current scope (analogous to CoffeeScript’s <a href="http://coffeescript.org/#fat-arrow">fat arrow</a>)</p>
+
+<pre><code>(defn Account [customer cart]
+  (js this.customer = customer)
+  (js this.cart = cart)
+
+  (chain 
+   ($ '.shopping-cart')
+   (on 'click' (fnth [event] (this.customer.purchase this.cart)))))
+</code></pre>
+
+<h4 id="defn"><code>defn</code></h4>
+
+<h5 id="defn-fnname-arg1-arg2--body"><code>(defn fn_name [arg1 arg2 ...] body)</code></h5>
+
+<p>Defines a function (see fn), binds it to a JavaScript variable and makes it available in the current namespace. Multiple arities work as for fn.</p>
+
+<pre><code>(defn fn_name
+  ([arg1 ... argN] body1)
+  ([arg1 ... argM] body2)
+  ...)
+   
+(defn print_and_inc [x] 
+  (prn x) 
+  (inc x))
+
+(defn some_func
+  ([] 0)
+  ([x] x)
+  ([x y] (add x y)))
+</code></pre>
+
+<h3 id="atoms">Atoms</h3>
+
+<h4 id="atom"><code>atom</code></h4>
+
+<h5 id="atom-val-writefn-readfn"><code>(atom val write_fn read_fn)</code></h5>
+
+<p>Returns a JavaScript object acting as a reference to a value. The value can be later accessed using deref and changed using swap and reset. It is typically intended to hold mutable state. Takes the initial value and two (optional) callbacks as arguments. The first (write callback) is invoked when the value is changed (through swap or reset) with the new value and the old value as arguments. The second (read callback) is invoked whenever the atom is dereferenced (through deref) with the value as argument.</p>
+
+<pre><code>(def a (atom {:a 1 :b 2}))
+(def b (atom 1) (fn [val old_val] (prn "Old:" old_val "New:" val)))
+(def c (atom 1) nil (fn [val] (prn "Someone just read:" val)))
+</code></pre>
+
+<h4 id="deref"><code>deref</code></h4>
+
+<h5 id="deref-atom"><code>(deref atom)</code></h5>
+
+<p>Returns the current value of an atom.</p>
+
+<pre><code>(def a (atom 1))
+(deref a)               =&gt; 1
+</code></pre>
+
+<h4 id="swap"><code>swap</code></h4>
+
+<h5 id="swap-atom-func-arg1-arg2-"><code>(swap atom func arg1 arg2 ...)</code></h5>
+
+<p>Takes an atom, a function and optional arguments, changes the value of the atom to be the return value of the function evaluated with the old value and the provided optional arguments as arguments.</p>
+
+<pre><code>(def a (atom 1))
+(swap a inc)
+(deref a)               =&gt; 2
+(swap a add 2)
+(deref a)               =&gt; 4
+</code></pre>
+
+<h4 id="reset"><code>reset</code></h4>
+
+<h5 id="reset-atom-val"><code>(reset atom val)</code></h5>
+
+<p>Takes an atom and a value and changes the value of the atom to the provided value.</p>
+
+<pre><code>(def a (atom 1))
+(reset a 2)
+(deref a)               =&gt; 2
+</code></pre>
+
+<h3 id="exceptions">Exceptions</h3>
+
+<h4 id="trycatchfinally"><code>try/catch/finally</code></h4>
+
+<h5 id="try-body-catch-e-catchbody-finally-finallybody"><code>(try body (catch e catch_body) (finally finally_body))</code></h5>
+
+<p>Evaluates the body and catches the eventual exception. It optionally supports a <code>finally</code> form meant to perform side-effects both in the case the exception is thrown or not.</p>
+
+<pre><code>(try
+  (div 1 0)
+  (catch e (prn "Exception caught" e)))
+</code></pre>
+
+<h4 id="throw"><code>throw</code></h4>
+
+<h5 id="throw-exceptionobject"><code>(throw exception_object)</code></h5>
+
+<p>Throws an exception with the supplied value.</p>
+
+<pre><code>(throw "Error")
+(throw (str "Error with value" 42))
+(throw nil)
+(try
+  (div 1 0)
+  (catch e (do (prn "Exception caught, rethrowing") 
+               (throw e))))
+</code></pre>
+
+<h3 id="flow">Flow</h3>
+
+<h4 id="threadf"><code>threadf</code></h4>
+
+<h5 id="threadf-val-func1-arg2-arg3--func2-arg2-arg3-"><code>(threadf val (func1 arg2 arg3 ...) (func2 arg2 arg3 ...))</code></h5>
+
+<p>Threads a value through a sequence of computations. It takes the first argument and it supplies it as the first argument to the second form. The result of the evaluation is supplied as the first argument to the third form and so on. It returns the result of the last evaluation.</p>
+
+<pre><code>(threadf 2 (mul 2) (add 1) (div 2))   =&gt; 2.5
+</code></pre>
+
+<h4 id="threadl"><code>threadl</code></h4>
+
+<h5 id="threadl-val-func1-arg1--argn-1-func2-arg1--argn-1"><code>(threadl val (func1 arg1 ... argN-1) (func2 arg1 ... argN-1))</code></h5>
+
+<p>Threads a value through a sequence of computations. It takes the first argument and it supplies it as the last argument to the second form. The result of the evaluation is supplied as the last argument to the third form and so on. It returns the result of the last evaluation.</p>
+
+<pre><code>(threadl (range 10) (filter is_even) (map (mul 2)))   =&gt; [0 4 8 12 16]
+</code></pre>
+
+<h4 id="do"><code>do</code></h4>
+
+<h5 id="do-func1-arg1-arg2--func2-arg1-arg2-"><code>(do (func1 arg1 arg2 ...) (func2 arg1 arg2 ...))</code></h5>
+
+<p>Evaluates all the supplied forms in order and returns the result of the last evaluation. Typically used for side effects</p>
+
+<pre><code>(do (prn "Value is 1") 1)
+</code></pre>
+
+<h4 id="chain"><code>chain</code></h4>
+
+<h5 id="chain-obj-method1-arg1-arg2--method2-arg1-arg2-"><code>(chain obj (method1 arg1 arg2 ...) (method2 arg1 arg2 ...))</code></h5>
+
+<p>Evaluates the form supplied as the second argument, where the function is treated as a property of the first argument (expected to be a JavaScript object), then does the same for the third argument and the object returned by the previous evaluation and so on.</p>
+
+<pre><code>(chain d3 (select "body") (append "p") (text "New paragraph"))
+</code></pre>
+
+<h4 id="doto"><code>doto</code></h4>
+
+<h5 id="doto-obj-method1-arg1-arg2--method2-arg1-arg2-"><code>(doto obj (method1 arg1 arg2 ...) (method2 arg1 arg2 ...))</code></h5>
+
+<p>Takes the first argument (expected to be a JavaScript object) and evaluates all subsequent forms treating functions as properties of the first argument.</p>
+
+<pre><code>(doto document.body 
+      (appendChild (document.createElement "p"))
+      (appendChild (document.createElement "p"))
+</code></pre>
+
+<h3 id="conditionals">Conditionals</h3>
+
+<h4 id="if"><code>if</code></h4>
+
+<h5 id="if-condition-doiftruthy-doiffalsey"><code>(if condition do_if_truthy do_if_falsey)</code></h5>
+
+<p>Returns the result of the evaluation of the second form if the evaluation of the first form is truthy, the result of the evaluation of the third form otherwise.</p>
+
+<pre><code>(if (gt 2 1) "2 &gt; 1" "1 &gt; 2")   =&gt; "2 &gt; 1"
+</code></pre>
+
+<h4 id="ifnot"><code>if_not</code></h4>
+
+<h5 id="ifnot-condition-doiffalsey-doiftruthy"><code>(if_not condition do_if_falsey do_if_truthy)</code></h5>
+
+<p>Returns the result of the evaluation of the second form if the evaluation of the first form is falsey, the result of the evaluation of the third form otherwise.</p>
+
+<pre><code>(if_not (gt 2 1) "not 2 &gt; 1" "not 1 &gt; 2")   =&gt; "not 1 &gt; 2"
+</code></pre>
+
+<h4 id="when"><code>when</code></h4>
+
+<h5 id="when-condition-doiftruthy"><code>(when condition do_if_truthy)</code></h5>
+
+<p>Returns the result of the evaluation of the second form if the evaluation of the first form is truthy, nil otherwise.</p>
+
+<pre><code>(when (lt 2 1) "2 &lt; 1")   =&gt; nil
+</code></pre>
+
+<h4 id="whennot"><code>when_not</code></h4>
+
+<h5 id="whennot-condition-doiffalsey"><code>(when_not condition do_if_falsey)</code></h5>
+
+<p>Returns the result of the evaluation of the second form if the evaluation of the first form is falsey, nil otherwise.</p>
+
+<pre><code>(when_not (gt 2 1) "2 &gt; 1")   =&gt; nil
+</code></pre>
+
+<h4 id="cond"><code>cond</code></h4>
+
+<h5 id="cond-cond1-doifcont1truthy-cond2-doifcond2truthy-"><code>(cond cond1 do_if_cont1_truthy cond2 do_if_cond2_truthy ...)</code></h5>
+
+<p>Returns the result of the evaluation of the second form if the first form evaluates to truthy, the result of the evaluation of the fourth form if the third form evaluates to truthy and so on.</p>
+
+<pre><code>(cond
+  (eq action "Eat apple") (swap energy inc)
+  (eq action "Drink potion") (swap energy (partial add 5))
+  :else energy)
+</code></pre>
+
+<h3 id="multimethods">Multimethods</h3>
+
+<h4 id="defmulti"><code>defmulti</code></h4>
+
+<h5 id="defmulti-fnname-dispatchfn"><code>(defmulti fn_name dispatch_fn)</code></h5>
+
+<p>Defines a multimethod given a name and a dispatch function. When invoked, it calls the function (provided using defmethod) that matches the return value of the dispatch function evaluated with the supplied arguments.</p>
+
+<pre><code>(defmulti sound (fn [animal] (get animal :type)))
+</code></pre>
+
+<h4 id="defmethod"><code>defmethod</code></h4>
+
+<h5 id="defmethod-fnname-dispatchvalue-arg1-arg2--body"><code>(defmethod fn_name dispatch_value [arg1 arg2 ...] body)</code></h5>
+
+<p>Defines a method given the name of the multimethod, a value against which the return value of the dispatch function is matched, a list of arguments and a function body.</p>
+
+<pre><code>(defmethod sound :cat [animal] "mieow")
+(defmethod sound :dog [animal] "woof")
+</code></pre>
+
+<h3 id="interoperability">Interoperability</h3>
+
+<h4 id="js"><code>js</code></h4>
+
+<h5 id="js-body"><code>(js body)</code></h5>
+
+<p>Treats arguments as JavaScript code, which gets expanded in the enclosing scope.</p>
+
+<pre><code>(js x + 1)
+(js function(x) { x + 1 })
+</code></pre>
+
+<h4 id="dot-notation"><code>dot notation</code></h4>
+
+<h5 id="method-object-arg1-arg2-"><code>(.method object arg1 arg2 ...)</code></h5>
+
+<p>Invokes method on object passed as first argument, using the following arguments as arguments.</p>
+
+<pre><code>(.toUpperCase "foobar")                     =&gt; "FOOBAR"
+(threadf (str "foo" "bar") 
+  (.toUpperCase) (.replace "BAR" "BAZ"))    =&gt; "FOOBAZ"
+</code></pre>
+
+<h3 id="namespaces">Namespaces</h3>
+
+<h4 id="ns"><code>ns</code></h4>
+
+<h5 id="ns-nsname-body"><code>(ns ns_name body)</code></h5>
+
+<p>Introduces a namespace with the given name. All variables and functions defined using <code>(def )</code> and <code>(defn )</code> forms are namespace globals and are available between separate <code>(ns )</code> forms with the same name. Namespace global variables can be accessed from other namespaces using the <code>&lt;ns&gt;/&lt;var&gt;</code> notation. Every <code>ki ()</code> form introduces an anonymous namespace. Namespaces can be nested.</p>
+
+<pre><code>(ns foo (def a 1))
+(ns bar (def a 2))
+(ns foo a)           =&gt; 1
+(ns bar foo/a)       =&gt; 1
+</code></pre>
+
+<h4 id="use"><code>use</code></h4>
+
+<h5 id="use-nsname"><code>(use ns_name)</code></h5>
+
+<p>Interns all variables of the supplied namespace into the current namespace</p>
+
+<pre><code>(ns foo (def a 1))
+(ns bar (use foo) a)    =&gt; 1
+</code></pre>
+
+<h3 id="variables">Variables</h3>
+
+<h4 id="def"><code>def</code></h4>
+
+<h5 id="def-name-value"><code>(def name value)</code></h5>
+
+<p>Defines a variable with the supplied name in the current namespace and binds it to the supplied value. The variable will be defined and will be bound to the same value in subsequent <code>(ns ...)</code> forms with the same namespace.</p>
+
+<pre><code>(def foo 1)
+</code></pre>
+
+<h3 id="looping-and-recursion">Looping and recursion</h3>
+
+<h4 id="while"><code>while</code></h4>
+
+<h5 id="while-cond-body"><code>(while cond body)</code></h5>
+
+<p>Repeatedly evaluates body until cond stops evaluating to truthy.</p>
+
+<pre><code>(def counter (atom 10))
+(while (geq (deref counter) 0)
+  (do
+   (prn counter)
+   (swap counter dec)))
+</code></pre>
+
+<h4 id="looprecur"><code>loop/recur</code></h4>
+
+<h5 id="loop-name1-val1-name2-val2--body--recur-newval1-newval2-">(loop [name1 val1 name2 val2 …] body … (recur newval1 newval2 …))</h5>
+
+<p>Evaluates body with the supplied local bindings. If <code>recur</code> is reached, re-evaluates body with bindings bound to the new supplied values. Returns the result of the last evaluated expression.</p>
+
+<pre><code>(loop [counter 10]
+  (prn counter)
+  (if_not (geq counter 0)
+    "Ignition!"
+    (recur (dec counter))))
+</code></pre>
+
+<h3 id="local-bindings">Local bindings</h3>
+
+<h4 id="let"><code>let</code></h4>
+
+<h5 id="let-name1-val1-name2-val2--body-"><code>(let [name1 val1 name2 val2 ...] body ...)</code></h5>
+
+<p>Evaluates body with the supplied local bindings. Returns the result of the last evaluated expression.</p>
+
+<pre><code>(let [a 1
+      b 2]
+  (add a b))        =&gt; 3
+
+(let [a 1]
+  (let [a (inc a)
+        b 2]
+    (add a b)))     =&gt; 4
+</code></pre>
+
+<h4 id="letc"><code>letc</code></h4>
+
+<h5 id="letc-name1-fn1-arg1--argn-1-name2-fn2-arg1--argn-1--body-"><code>(letc [name1 (fn1 arg1 ... argN-1) name2 (fn2 arg1 ... argN-1) ...] body ...)</code></h5>
+
+<p>Evaluates supplied functions by passing a callback taking the bindings as the last argument. Returns nil.</p>
+
+<p>It allows to write callback-based APIs sequentially. The following</p>
+
+<pre><code>ki require 'fs' as fs
+
+ki (letc [[err1 data1] (fs.readFile "first.csv")
+          [err2 data2] (fs.readFile "second.csv")]
+          {:first data1 :second data2})
+</code></pre>
+
+<p>is equivalent to</p>
+
+<pre><code>ki require 'fs' as fs
+
+ki (fs.readFile "first.csv" 
+    (fn [err1 data1]
+     (fs.readFile "second.csv" 
+      (fn [err2 data2]
+       {:first data1 :second data2}))))
+</code></pre>
+
+<h3 id="misc">Misc</h3>
+
+<h4 id="str"><code>str</code></h4>
+
+<h5 id="str-arg1-arg2-"><code>(str arg1 arg2 ...)</code></h5>
+
+<p>Converts the arguments to string and returns their concatenation (with a single space separator).</p>
+
+<pre><code>(str "One is" 1 "and two is" 2)    =&gt; "One is 1 and two is 2"
+</code></pre>
+
+<h4 id="prn"><code>prn</code></h4>
+
+<h5 id="prn-arg1-arg2-"><code>(prn arg1 arg2 ...)</code></h5>
+
+<p>Converts the arguments to string and outputs their concatenation to standard output.</p>
+
+<pre><code>(prn "One is" 1 "and two is" 2)
+</code></pre>
+
+
+        </div>
+        <div class="pure-u-1-5"></div>
+      </div>
+
+      <script type="text/javascript">
+
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-49216937-1']);
+        _gaq.push(['_setDomainName', 'ki-lang.org']);
+        _gaq.push(['_trackPageview']);
+        
+        (function() {
+         var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+         ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+         var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+         })();
+
+      </script>
+
+      </body>
+      </html>

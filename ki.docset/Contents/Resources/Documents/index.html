@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>ki</title>
+        <meta name="viewport" content="width=device-width">
+
+        <link href='http://fonts.googleapis.com/css?family=Droid+Sans+Mono|Open+Sans:400italic,400' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="css/syntax.css">
+      	
+        <link rel="stylesheet" href="css/default.css">
+
+    </head>
+
+    <body>
+      <a href="https://github.com/lantiga/ki"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://github-camo.global.ssl.fastly.net/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+    	<div class="pure-g">
+        <div class="pure-u-1-5"></div>
+    		<div class="pure-u-3-5">
+          <a href=""><img height="auto" width="100%" style="margin-top: 20px;" src="images/ki-color.svg" /></a>
+          <h1 id="ki">ki</h1>
+
+<h3 id="a-lisp-for-your-javascript">A lisp for your JavaScript</h3>
+
+<p>ki is a functional programming language that expands into JavaScript through a very thin layer of <a href="http://sweetjs.org">sweet.js</a> macros. It is designed to complement JavaScript, enriching it with functional programming idioms and immutable data structures. ki can be used to write entire applications, individual components (e.g. state management) or just functional one-liners.</p>
+
+<p>ki syntax and semantics are heavily inspired by <a href="http://clojure.org">Clojure</a>. Thanks to <a href="http://swannodette.github.io/mori/">mori</a>, ki incorporates <a href="https://github.com/clojure/clojurescript">ClojureScript</a>’s persistent data structures and related API. Here’s a taste of what ki looks like when intermixed with JavaScript:</p>
+
+<pre><code>var nums = ki (take 6 (map (fn [x] (js x * 2)) (range 1000)));
+</code></pre>
+
+<p><a href="editor/editor.html"><strong>Try ki in your browser</strong></a>.</p>
+
+<h3 id="installing-ki">Installing ki</h3>
+
+<pre><code>npm install -g ki
+</code></pre>
+
+<h3 id="compiling-ki-code">Compiling ki code</h3>
+
+<pre><code>ki -o main.out.js main.js
+</code></pre>
+
+<h3 id="features">Features</h3>
+
+<p>ki has lambdas, lexical scoping, namespaces, local bindings, recursion, persistent data structures, lazyness, data literals, keywords, multiple arity functions, backcall-style continuations, multimethods, atoms and macros. And source maps.</p>
+
+<h3 id="documentation">Documentation</h3>
+
+<!-- [ki in 10 minutes]() -->
+
+<h4 id="api">API</h4>
+
+<p><a href="api.html">ki reference</a></p>
+
+<h4 id="examples">Examples</h4>
+
+<p><a href="react.html">ReactJS tutorial in ki</a></p>
+
+<p><a href="https://gist.github.com/lantiga/9855416">Managing state in ki</a></p>
+
+<h3 id="license">License</h3>
+
+<p><a href="http://www.opensource.org/licenses/mit-license.php/">MIT license</a>, Copyright (C) 2014 <a href="http://lantiga.github.io">Luca Antiga</a>.</p>
+
+<h3 id="contact-me">Contact me</h3>
+
+<p>Reach me on GitHub (<a href="https://github.com/lantiga">@lantiga</a>) or Twitter (<a href="http://twitter.com/lantiga">@lantiga</a>).</p>
+
+
+        </div>
+        <div class="pure-u-1-5"></div>
+      </div>
+
+      <script type="text/javascript">
+
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-49216937-1']);
+        _gaq.push(['_setDomainName', 'ki-lang.org']);
+        _gaq.push(['_trackPageview']);
+        
+        (function() {
+         var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+         ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+         var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+         })();
+
+      </script>
+
+      </body>
+      </html>
