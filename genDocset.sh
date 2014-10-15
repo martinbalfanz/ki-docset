@@ -1,5 +1,11 @@
 #!/bin/sh
 
+if [ "$1" == "update" ]; then
+    git submodule foreach "git pull origin gh-pages"
+    sh genDocset.sh
+    exit 0
+fi
+
 RES="ki.docset/Contents/Resources/"
 DOC="${RES}Documents/"
 IDX="${RES}docSet.dsidx"
