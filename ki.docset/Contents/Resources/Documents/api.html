@@ -45,6 +45,7 @@
 <a href="#namespaces">Namespaces</a>
 <a href="#looping-and-recursion">Looping and recursion</a>
 <a href="#local-bindings">Local bindings</a>
+<a href="#destructuring">Destructuring</a>
 <a href="#misc">Misc</a></p>
 
 <hr />
@@ -665,6 +666,8 @@ ki (prn foo);      =&gt; 5
     (recur (dec counter))))
 </code></pre>
 
+<p>Loop supports destructuring, see <code>let</code>.</p>
+
 <h3 id="local-bindings">Local bindings</h3>
 
 <h4 id="let"><code>let</code></h4>
@@ -681,6 +684,28 @@ ki (prn foo);      =&gt; 5
   (let [a (inc a)
         b 2]
     (add a b)))     =&gt; 4
+</code></pre>
+
+<p><code>let</code> supports destructuring of nested data structures, both immutable data structure </p>
+
+<pre><code>(defn transformCircle [circle shift scale] 
+  (let [{[x y] :center r :radius} circle
+        [dx dy] shift]
+   {:center [(add x dx) (add y dy)] 
+    :radius (mul r scale)}))
+
+(transformCircle {:point [10 20] :radius 5} [2 3] 10)
+</code></pre>
+
+<p>and JS objects and arrays</p>
+
+<pre><code>(defn transformCircle [circle shift scale] 
+  (let [{$ [$ x y] :center r :radius} circle
+        [$ dx dy] shift]
+   {$ center [$ (add x dx) (add y dy)] 
+      radius (mul r scale)}))
+
+(transformCircle {$ point [$ 10 20] radius 5} [$ 2 3] 10)
 </code></pre>
 
 <h4 id="letc"><code>letc</code></h4>
